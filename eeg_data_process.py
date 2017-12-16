@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 #          3rd dimension is the index of frequency for which the power was computed
 # [freqs] - Frequencies which are associated with third dimension of [hist]
 # [downsample=1] - Downsamples frequency granularity by said factor (1=no downsampling)
-def eeg_raw_to_hist(eldata, n_electrodes = 2,window = 4096,step = 256,downsample=1):
+def eeg_raw_to_hist(eldata, n_electrodes = 2,window = 2048,step = 1792,downsample=1):
     freqs = np.arange(int(window/2)+1)/(int(window/2)) *128
     freqs = freqs[::downsample]
     hist = np.zeros((n_electrodes,len(range(window,eldata.shape[0],step)),len(freqs)),dtype=np.float)

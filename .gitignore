@@ -103,3 +103,4 @@ sample_data/recording.dat
 sample_data/recording.ovibe
 *.stages
 *.swp
+sample_data/*
