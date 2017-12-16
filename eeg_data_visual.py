@@ -152,6 +152,10 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="inferno",vmin=None,vmax=
             line1.set_xdata(np.concatenate((stage_times,[sleep_dur])))
             line1.set_ydata(np.concatenate((stage_labels,[stage_labels[-1]])))
             fig.canvas.draw()
+            for i in range(1,len(stage_labels)):
+                if stage_labels[i] == stage_labels[i-1]:
+                    stage_labels.pop(i)
+                    stage_times.pop(i)
         def done(event):
             plt.close()
         bdone.on_clicked(done)
