@@ -101,4 +101,5 @@ ENV/
 .mypy_cache/
 sample_data/recording.dat
 sample_data/recording.ovibe
+*.stages
 *.swp

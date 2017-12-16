@@ -63,33 +63,49 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 # [label=1] - 1=Labeling mode On, 0=Off
 def plot_eeg_log_hist(hist, elid, freqs=None, colormap="inferno",vmin=None,vmax=None,label=True):
     log_hist=np.log(hist[elid,:,:])
+    sleep_dur = np.shape(log_hist)[0]
     if vmin is None:
         vmin = np.min(log_hist)+0.3*np.ptp(log_hist)
     if vmax is None:
         vmax = np.max(log_hist)
     fig=plt.figure(figsize=(15, 7.5))
-    ticks = np.arange(0,len(freqs),np.argmax(freqs>5)-1)
-    ticklabels = ["{:6.2f}".format(i) for i in freqs[ticks]]
+    yticks = np.arange(0,len(freqs),np.argmax(freqs>5)-1)
+    yticklabels = ["{:6.2f}".format(i) for i in freqs[yticks]]
+    xtickspacing = 300;
+    if len(np.arange(0,sleep_dur,300)) > 20:
+        xtickspacing = 600;
+    if len(np.arange(0,sleep_dur,600)) > 20:
+        xtickspacing = 1200;
+    if len(np.arange(0,sleep_dur,1200)) > 20:
+        xtickspacing = 1800;
+    if len(np.arange(0,sleep_dur,1800)) > 20:
+        xtickspacing = 3600;
+
+    xticks = np.arange(0,sleep_dur,xtickspacing)
+    xticklabels = [str(int(i/60)) for i in xticks]
+    plt.gca().set_xticks(xticks)
+    plt.gca().set_xticklabels(xticklabels)
     if label is False:
         if freqs is not None:
-            plt.gca().set_yticks(ticks)
-            plt.gca().set_yticklabels(ticklabels)
+            plt.gca().set_yticks(yticks)
+            plt.gca().set_yticklabels(yticklabels)
 
         plt.imshow(np.transpose(log_hist), origin="lower", aspect="auto", 
                 cmap=colormap, interpolation="none",vmin=vmin,vmax=vmax,picker=label)
-        plt.xlabel("Time (s)")
+        plt.xlabel("Time (min)")
         plt.ylabel("Frequency (Hz)")
         plt.title("EEG Spectrogram")
 
     if label is True:
-        sleep_dur = np.shape(log_hist)[0]
         sleep_stage_labels = ['NREM3','NREM2','REM','NREM1','WAKE','MASK OFF','???']
         plt.title("EEG Spectrogram")
         gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
         ax0 = plt.subplot(gs[0])
         if freqs is not None:
-            ax0.set_yticks(ticks)
-            ax0.set_yticklabels(ticklabels)
+            ax0.set_yticks(yticks)
+            ax0.set_yticklabels(yticklabels)
+        ax0.set_xticks(xticks)
+        ax0.set_xticklabels(xticklabels)
         ax0.imshow(np.transpose(log_hist), origin="lower", aspect="auto", 
                 cmap=colormap, interpolation="none",vmin=vmin,vmax=vmax,picker=label)
         ax0.set_ylabel("Frequency (Hz)")
@@ -98,11 +114,13 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="inferno",vmin=None,vmax=
         stage_labels = [5]
         ax1 = plt.subplot(gs[1])
         line1,=ax1.plot(np.concatenate((stage_times,[sleep_dur])), np.concatenate((stage_labels,[stage_labels[-1]])),drawstyle="steps-post")
-        ax1.set_xlabel("Time (s)")
+        ax1.set_xlabel("Time (min)")
         ax1.set_ylabel("Sleep Stage")
         ax1.set_xlim(0,sleep_dur)
         ax1.set_yticks(np.arange(7))
         ax1.set_yticklabels(sleep_stage_labels)
+        ax1.set_xticks(xticks)
+        ax1.set_xticklabels(xticklabels)
 
         plot_eeg_log_hist.stage_label = 6
         rax = plt.axes([0.0, 0.0, 0.10, 0.10], facecolor='lightgoldenrodyellow')
