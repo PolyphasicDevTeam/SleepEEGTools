@@ -37,29 +37,36 @@ def load_eeg_raw(fname,n_electrodes=2):
 # [eldata] 2D array of electrode traces with shape n_samples*n_electrodes
 def load_eeg_openvibe(fname,n_electrodes=2,delim=';'):
     with open(fname) as f:
-        a = f.read().splitlines()
-        if len(a) < 2:
+        for i, l in enumerate(f):
+            pass
+    nlines = i
+    with open(fname) as f:
+        if nlines+1 < 2:
             raise IOError("Invalid file format")
-        header = a[0].split(delim)
-        if header[0] != "Time (s)":
-            raise IOError("Invalid file format. First column should be Time.")
-        if header[-1] != "Sampling Rate":
-            raise IOError("Invalid file format. Last column should be Sampling Rate.")
-        for i in range(1,len(header)-1):
-            if header[i] != "Channel " + str(i):
-                raise IOError("Invalid file format. Column " + str(i+1) +
-                    " should be Channel " + str(i))
-        if len(header) - 2 < n_electrodes:
-            n_electrodes = len(header) - 2
-            warnings.warn("Not enough electrode channels in the file. Only " 
-                    + str(n_electrodes) + " will be read")
-        a.pop(0)
-        eldata = np.zeros((len(a),n_electrodes),dtype=np.float)
+        eldata = np.zeros((nlines,n_electrodes),dtype=np.float)
         n = 0;
-        for ln in a:
+        for ln in f:
+            ln=ln.rstrip()
+            if n == 0:
+                print(ln)
+                header = ln.split(delim)
+                if header[0] != "Time (s)":
+                    raise IOError("Invalid file format. First column should be Time.")
+                if header[-1] != "Sampling Rate":
+                    raise IOError("Invalid file format. Last column should be Sampling Rate.")
+                for i in range(1,len(header)-1):
+                    if header[i] != "Channel " + str(i):
+                        raise IOError("Invalid file format. Column " + str(i+1) +
+                            " should be Channel " + str(i))
+                if len(header) - 2 < n_electrodes:
+                    n_electrodes = len(header) - 2
+                    warnings.warn("Not enough electrode channels in the file. Only " 
+                            + str(n_electrodes) + " will be read")
+                n+=1
+                continue
             strdata = ln.split(delim)
             for elid in range(n_electrodes):
-                eldata[n][elid] = float(strdata[elid+1])-512
+                eldata[n-1][elid] = float(strdata[elid+1])-512
             n+=1
     return eldata
 
