@@ -130,9 +130,9 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         ax1.set_xticks(xticks)
         ax1.set_xticklabels(xticklabels)
 
-        plot_eeg_log_hist.stage_label = 6
+        plot_eeg_log_hist.stage_label = 0
         rax = plt.axes([0.0, 0.0, 0.10, 0.21], facecolor='lightgoldenrodyellow')
-        radio = RadioButtons(rax, sleep_stage_labels, active=6)
+        radio = RadioButtons(rax, sleep_stage_labels[::-1], active=plot_eeg_log_hist.stage_label)
         axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
         bdone = Button(axdone, 'Next')
         def stagepicker(label):
