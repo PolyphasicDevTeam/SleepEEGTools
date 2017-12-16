@@ -56,15 +56,16 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 # [hist] - Histogram data produced by eeg_data.process.eeg_raw_to_hist()
 # [elid] - ID of the elctrode to be used for plotting
 # [freqs=None] - Frequency index eeg_data.process.eeg_raw_to_hist()
-# [colormap="jet"] - Colormap to be used
+# [colormap="parula"] - Colormap to be used
+# [spacing=1792] - Spacing used when generating the histogram
 # [vmin=None] - Value of log hist which is used for the lowest color
 #               Default is np.min(log_hist)+0.3*np.ptp(log_hist)
 # [vmax=None] - Value of log hist which is used for the higest color
 #               Default is np.max(log_hist)
 # [label=1] - 1=Labeling mode On, 0=Off
-def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",vmin=None,vmax=None,label=True):
+def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmin=None,vmax=None,label=True):
     log_hist=np.log(hist[elid,:,:])
-    sleep_dur = np.shape(log_hist)[0]
+    sleep_dur = np.shape(log_hist)[0]*spacing/256
     if vmin is None:
         vmin = np.min(log_hist)+0.5*np.ptp(log_hist)
     if vmax is None:
@@ -87,6 +88,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",vmin=None,vmax=N
 
     xticks = np.arange(0,sleep_dur,xtickspacing)
     xticklabels = [str(int(i/60)) for i in xticks]
+    xticks = xticks/(1792/256)
     plt.gca().set_xticks(xticks)
     plt.gca().set_xticklabels(xticklabels)
     if label is False:
@@ -117,10 +119,10 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",vmin=None,vmax=N
         stage_times = [0]
         stage_labels = [5]
         ax1 = plt.subplot(gs[1])
-        line1,=ax1.plot(np.concatenate((stage_times,[sleep_dur])), np.concatenate((stage_labels,[stage_labels[-1]])),drawstyle="steps-post")
+        line1,=ax1.plot(np.concatenate((stage_times,[sleep_dur/(spacing/256)])), np.concatenate((stage_labels,[stage_labels[-1]])),drawstyle="steps-post")
         ax1.set_xlabel("Time (min)")
         ax1.set_ylabel("Sleep Stage")
-        ax1.set_xlim(0,sleep_dur)
+        ax1.set_xlim(0,sleep_dur/(spacing/256))
         ax1.set_yticks(np.arange(7))
         ax1.set_yticklabels(sleep_stage_labels)
         ax1.set_xticks(xticks)
@@ -153,7 +155,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",vmin=None,vmax=N
                     stage_labels.append(plot_eeg_log_hist.stage_label)
             #print(stage_times)
             #print(stage_labels)
-            line1.set_xdata(np.concatenate((stage_times,[sleep_dur])))
+            line1.set_xdata(np.concatenate((stage_times,[sleep_dur/(spacing/256)])))
             line1.set_ydata(np.concatenate((stage_labels,[stage_labels[-1]])))
             fig.canvas.draw()
             for i in range(1,len(stage_labels)):
@@ -167,6 +169,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",vmin=None,vmax=N
         fig.canvas.callbacks.connect('pick_event', on_pick)
     plt.subplots_adjust(left=0.075, bottom=0.14, right=0.99, top=0.99)
     plt.show()
+    stage_times = np.array(stage_times)*(spacing/256)
     if label:
         return stage_times, stage_labels
     else:
