@@ -51,19 +51,20 @@ def plot_eeg_data(eldata, n_electrodes = 2):
     plt.show()
  
 #####
-# Plots  the frequency power specrogram for a given electrode power histogram
+# Plots the frequency power spectrogram for a given electrode power histogram
 # For color intensity, log of the power is used
 # [hist] - Histogram data produced by eeg_data.process.eeg_raw_to_hist()
 # [elid] - ID of the elctrode to be used for plotting
 # [freqs=None] - Frequency index eeg_data.process.eeg_raw_to_hist()
 # [colormap="parula"] - Colormap to be used
 # [spacing=1792] - Spacing used when generating the histogram
+# [figsize=(15, 7.5)] - Size of the spectrogram figure
 # [vmin=None] - Value of log hist which is used for the lowest color
 #               Default is np.min(log_hist)+0.3*np.ptp(log_hist)
 # [vmax=None] - Value of log hist which is used for the higest color
 #               Default is np.max(log_hist)
 # [label=1] - 1=Labeling mode On, 0=Off
-def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmin=None,vmax=None,label=True):
+def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True):
     log_hist=np.log(hist[elid,:,:])
     sleep_dur = np.shape(log_hist)[0]*spacing/256
     if vmin is None:
@@ -73,7 +74,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmi
     if colormap == "parula":
         global parula_map
         colormap = parula_map
-    fig=plt.figure(figsize=(15, 7.5))
+    fig=plt.figure(figsize=figsize)
     yticks = np.arange(0,len(freqs),np.argmax(freqs>5)-1)
     yticklabels = ["{:6.2f}".format(i) for i in freqs[yticks]]
     xtickspacing = 300;
