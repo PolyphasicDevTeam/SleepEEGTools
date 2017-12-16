@@ -48,7 +48,7 @@ def load_eeg_openvibe(fname,n_electrodes=2,delim=';'):
         for ln in f:
             ln=ln.rstrip()
             if n == 0:
-                print(ln)
+                #print(ln)
                 header = ln.split(delim)
                 if header[0] != "Time (s)":
                     raise IOError("Invalid file format. First column should be Time.")

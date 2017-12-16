@@ -19,8 +19,11 @@ import matplotlib.pyplot as plt
 #          2nd dimension is the timepoint
 #          3rd dimension is the index of frequency for which the power was computed
 # [freqs] - Frequencies which are associated with third dimension of [hist]
-def eeg_raw_to_hist(eldata, n_electrodes = 2,window = 4096,step = 256):
-    hist = np.zeros((n_electrodes,len(range(window,eldata.shape[0],step)),int(window/2)+1),dtype=np.float)
+# [downsample=1] - Downsamples frequency granularity by said factor (1=no downsampling)
+def eeg_raw_to_hist(eldata, n_electrodes = 2,window = 4096,step = 256,downsample=1):
+    freqs = np.arange(int(window/2)+1)/(int(window/2)) *128
+    freqs = freqs[::downsample]
+    hist = np.zeros((n_electrodes,len(range(window,eldata.shape[0],step)),len(freqs)),dtype=np.float)
     for el in range(n_electrodes):
         n = 0;
         for d in range(window,eldata.shape[0],step):
@@ -29,9 +32,8 @@ def eeg_raw_to_hist(eldata, n_electrodes = 2,window = 4096,step = 256):
             p = speriodogram(w, detrend=False, sampling=256)
             #plt.plot(p)
             #plt.show()
-            hist[el,n,:]=p
+            hist[el,n,:]=p[::downsample]
             n+=1
-    freqs = np.arange(int(window/2)+1)/(int(window/2)) *128
     return hist, freqs
 
 #####
