@@ -60,18 +60,20 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 # [spacing=1792] - Spacing used when generating the histogram
 # [figsize=(15, 7.5)] - Size of the spectrogram figure
 # [vmin=None] - Value of log hist which is used for the lowest color
-#               Default is np.min(log_hist)+0.3*np.ptp(log_hist)
+#               Default is np.min(log_hist)+0.43*np.ptp(log_hist)
 # [vmax=None] - Value of log hist which is used for the higest color
-#               Default is np.max(log_hist)
+#               Default is np.max(log_hist)-0.03*np.ptp(log_hist)
 # [label=1] - 1=Labeling mode On, 0=Off
 # [block=1] - 1=Block execution of script, 0=Do not block
 def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True, block=True):
     log_hist=np.log(hist[elid,:,:])
     sleep_dur = np.shape(log_hist)[0]*spacing/256
     if vmin is None:
-        vmin = np.min(log_hist)+0.5*np.ptp(log_hist)
+        vmin = np.min(log_hist)+0.43*np.ptp(log_hist)
     if vmax is None:
-        vmax = np.max(log_hist)
+        vmax = np.max(log_hist)-0.03*np.ptp(log_hist)
+    #print ("chosen vmin = " + str(vmin))
+    #print ("chosen vmax = " + str(vmax))
     if colormap == "parula":
         global parula_map
         colormap = parula_map
