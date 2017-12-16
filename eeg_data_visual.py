@@ -1,8 +1,16 @@
 #/bin/python3.6
+'''
+Visualization module of the EEG Processing Suite
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 
+#####
+# Plots raw EEG data
+# Parameters:
+# [eldata] - Raw EEG data in shape n_samples*n_electrodes
+# [n_electrodes] - Number of electrodes to be displayed
 def plot_eeg_data(eldata, n_electrodes = 2):
     fig = plt.figure("EEG Data")
     ax2 = fig.add_subplot(111)
@@ -38,8 +46,24 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 
     plt.tight_layout()
     plt.show()
-
-def plot_eeg_hist(hist, elid, freqs=None, colormap="jet"):
+ 
+#####
+# Plots  the frequency power specrogram for a given electrode power histogram
+# For color intensity, log of the power is used
+# [hist] - Histogram data produced by eeg_data.process.eeg_raw_to_hist()
+# [elid] - ID of the elctrode to be used for plotting
+# [freqs=None] - Frequency index eeg_data.process.eeg_raw_to_hist()
+# [colormap="jet"] - Colormap to be used
+# [vmin=None] - Value of log hist which is used for the lowest color
+#               Default is np.min(log_hist)+0.3*np.ptp(log_hist)
+# [vmax=None] - Value of log hist which is used for the higest color
+#               Default is np.max(log_hist)
+def plot_eeg_log_hist(hist, elid, freqs=None, colormap="inferno",vmin=None,vmax=None):
+    log_hist=np.log(hist[elid,:,:])
+    if vmin is None:
+        vmin = np.min(log_hist)+0.3*np.ptp(log_hist)
+    if vmax is None:
+        vmax = np.max(log_hist)
     plt.figure(figsize=(15, 7.5))
     ticks = np.arange(0,len(freqs),np.argmax(freqs>5)-1)
     ticklabels = ["{:6.2f}".format(i) for i in freqs[ticks]]
@@ -47,5 +71,8 @@ def plot_eeg_hist(hist, elid, freqs=None, colormap="jet"):
         plt.gca().set_yticks(ticks)
         plt.gca().set_yticklabels(ticklabels)
 
-    plt.imshow(np.transpose(hist[elid,:,:]), origin="lower", aspect="auto", cmap=colormap, interpolation="none",vmin=0,vmax=10000)
+    plt.imshow(np.transpose(np.log(hist[elid,:,:])), origin="lower", aspect="auto", cmap=colormap, interpolation="none",vmin=vmin,vmax=vmax)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Frequency (Hz)")
+    plt.title("EEG Spectrogram")
     plt.show()
