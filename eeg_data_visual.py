@@ -131,7 +131,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         ax1.set_xticklabels(xticklabels)
 
         plot_eeg_log_hist.stage_label = 6
-        rax = plt.axes([0.0, 0.0, 0.10, 0.10], facecolor='lightgoldenrodyellow')
+        rax = plt.axes([0.0, 0.0, 0.10, 0.21], facecolor='lightgoldenrodyellow')
         radio = RadioButtons(rax, sleep_stage_labels, active=6)
         axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
         bdone = Button(axdone, 'Next')
@@ -169,7 +169,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         bdone.on_clicked(done)
         radio.on_clicked(stagepicker)
         fig.canvas.callbacks.connect('pick_event', on_pick)
-    plt.subplots_adjust(left=0.075, bottom=0.14, right=0.99, top=0.99)
+    plt.subplots_adjust(left=0.075, bottom=0.25 if label else 0.075, right=0.99, top=0.99)
     if block:
         plt.show()
     else:
