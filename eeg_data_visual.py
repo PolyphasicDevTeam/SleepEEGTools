@@ -174,8 +174,8 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         plt.show()
     else:
         plt.draw()
-    stage_times = np.array(stage_times)*(spacing/256)
     if label:
+        stage_times = np.array(stage_times)*(spacing/256)
         return stage_times, stage_labels
     else:
         return None
