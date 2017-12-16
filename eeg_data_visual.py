@@ -64,7 +64,8 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 # [vmax=None] - Value of log hist which is used for the higest color
 #               Default is np.max(log_hist)
 # [label=1] - 1=Labeling mode On, 0=Off
-def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True):
+# [block=1] - 1=Block execution of script, 0=Do not block
+def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True, block=True):
     log_hist=np.log(hist[elid,:,:])
     sleep_dur = np.shape(log_hist)[0]*spacing/256
     if vmin is None:
@@ -169,7 +170,10 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         radio.on_clicked(stagepicker)
         fig.canvas.callbacks.connect('pick_event', on_pick)
     plt.subplots_adjust(left=0.075, bottom=0.14, right=0.99, top=0.99)
-    plt.show()
+    if block:
+        plt.show()
+    else:
+        plt.draw()
     stage_times = np.array(stage_times)*(spacing/256)
     if label:
         return stage_times, stage_labels
