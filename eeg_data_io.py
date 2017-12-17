@@ -6,6 +6,7 @@ for processing and display in other modules of the EEG Processing suite.
 '''
 import numpy as np
 import warnings
+import csv
 
 ######
 #Loads EEG data from a raw, space separated format.
@@ -70,4 +71,9 @@ def load_eeg_openvibe(fname,n_electrodes=2,delim=';'):
             n+=1
     return eldata
 
+def load_sleep_stage_data(fname):
+    with open(fname) as f:
+        reader = csv.reader(f)
+        data = np.asfarray(np.array(list(reader)),float)
+    return data[:,0], data[:,1]
 
