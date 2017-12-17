@@ -181,7 +181,6 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         stage_times = np.array(stage_times)*(spacing/256)
         stage_times=np.concatenate((stage_times,[sleep_dur]))
         stage_labels=np.concatenate((stage_labels,[6]))
-        stage_times = np.array(stage_times)*(spacing/256)
         return stage_times, stage_labels
     else:
         return None
