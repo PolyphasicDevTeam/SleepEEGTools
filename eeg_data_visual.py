@@ -104,13 +104,13 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
                 cmap=colormap, interpolation="none",vmin=vmin,vmax=vmax,picker=label)
         plt.xlabel("Time (min)")
         plt.ylabel("Frequency (Hz)")
-        plt.title("EEG Spectrogram")
+        plt.title("EEG Spectrogram (electrode pair " + str(elid) + ")")
 
     if label is True:
         sleep_stage_labels = ['NREM3','NREM2','REM','NREM1','WAKE','MASK OFF','???']
-        plt.title("EEG Spectrogram")
         gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
         ax0 = plt.subplot(gs[0])
+        ax0.set_title("EEG Spectrogram (electrode pair " + str(elid) + ")")
         if freqs is not None:
             ax0.set_yticks(yticks)
             ax0.set_yticklabels(yticklabels)
@@ -132,9 +132,9 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         ax1.set_xticks(xticks)
         ax1.set_xticklabels(xticklabels)
 
-        plot_eeg_log_hist.stage_label = 0
-        rax = plt.axes([0.0, 0.0, 0.10, 0.21], facecolor='lightgoldenrodyellow')
-        radio = RadioButtons(rax, sleep_stage_labels[::-1], active=plot_eeg_log_hist.stage_label)
+        plot_eeg_log_hist.stage_label = 6
+        rax = plt.axes([0.0, 0.0, 0.2, 0.2], facecolor='lightgoldenrodyellow')
+        radio = RadioButtons(rax, sleep_stage_labels[::-1], active=0)
         axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
         bdone = Button(axdone, 'Next')
         def stagepicker(label):
@@ -172,7 +172,7 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         radio.on_clicked(stagepicker)
         fig.canvas.callbacks.connect('pick_event', on_pick)
 
-    plt.subplots_adjust(left=0.075, bottom=0.25 if label else 0.075, right=0.99, top=0.99)
+    plt.subplots_adjust(left=0.2 if figsize[0] < 10 else 0.075, bottom=0.25 if label else 0.075, right=0.99, top=0.95 if label else 0.9)
     if block:
         plt.show()
     else:
@@ -181,7 +181,6 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
         stage_times = np.array(stage_times)*(spacing/256)
         stage_times=np.concatenate((stage_times,[sleep_dur]))
         stage_labels=np.concatenate((stage_labels,[6]))
-        stage_times = np.array(stage_times)*(spacing/256)
         return stage_times, stage_labels
     else:
         return None
