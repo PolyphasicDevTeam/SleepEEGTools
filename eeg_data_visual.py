@@ -51,29 +51,33 @@ def plot_eeg_data(eldata, n_electrodes = 2):
     plt.show()
  
 #####
-# Plots  the frequency power specrogram for a given electrode power histogram
+# Plots the frequency power spectrogram for a given electrode power histogram
 # For color intensity, log of the power is used
 # [hist] - Histogram data produced by eeg_data.process.eeg_raw_to_hist()
 # [elid] - ID of the elctrode to be used for plotting
 # [freqs=None] - Frequency index eeg_data.process.eeg_raw_to_hist()
 # [colormap="parula"] - Colormap to be used
 # [spacing=1792] - Spacing used when generating the histogram
+# [figsize=(15, 7.5)] - Size of the spectrogram figure
 # [vmin=None] - Value of log hist which is used for the lowest color
-#               Default is np.min(log_hist)+0.3*np.ptp(log_hist)
+#               Default is np.min(log_hist)+0.43*np.ptp(log_hist)
 # [vmax=None] - Value of log hist which is used for the higest color
-#               Default is np.max(log_hist)
+#               Default is np.max(log_hist)-0.03*np.ptp(log_hist)
 # [label=1] - 1=Labeling mode On, 0=Off
-def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmin=None,vmax=None,label=True):
+# [block=1] - 1=Block execution of script, 0=Do not block
+def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True, block=True):
     log_hist=np.log(hist[elid,:,:])
     sleep_dur = np.shape(log_hist)[0]*spacing/256
     if vmin is None:
-        vmin = np.min(log_hist)+0.5*np.ptp(log_hist)
+        vmin = np.min(log_hist)+0.43*np.ptp(log_hist)
     if vmax is None:
-        vmax = np.max(log_hist)
+        vmax = np.max(log_hist)-0.03*np.ptp(log_hist)
+    #print ("chosen vmin = " + str(vmin))
+    #print ("chosen vmax = " + str(vmax))
     if colormap == "parula":
         global parula_map
         colormap = parula_map
-    fig=plt.figure(figsize=(15, 7.5))
+    fig=plt.figure(figsize=figsize)
     yticks = np.arange(0,len(freqs),np.argmax(freqs>5)-1)
     yticklabels = ["{:6.2f}".format(i) for i in freqs[yticks]]
     xtickspacing = 300;
@@ -128,9 +132,9 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmi
         ax1.set_xticks(xticks)
         ax1.set_xticklabels(xticklabels)
 
-        plot_eeg_log_hist.stage_label = 6
-        rax = plt.axes([0.0, 0.0, 0.10, 0.10], facecolor='lightgoldenrodyellow')
-        radio = RadioButtons(rax, sleep_stage_labels, active=6)
+        plot_eeg_log_hist.stage_label = 0
+        rax = plt.axes([0.0, 0.0, 0.10, 0.21], facecolor='lightgoldenrodyellow')
+        radio = RadioButtons(rax, sleep_stage_labels[::-1], active=plot_eeg_log_hist.stage_label)
         axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
         bdone = Button(axdone, 'Next')
         def stagepicker(label):
@@ -167,12 +171,17 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmi
         bdone.on_clicked(done)
         radio.on_clicked(stagepicker)
         fig.canvas.callbacks.connect('pick_event', on_pick)
-    plt.subplots_adjust(left=0.075, bottom=0.14, right=0.99, top=0.99)
-    plt.show()
-    stage_times = np.array(stage_times)*(spacing/256)
-    stage_times=np.concatenate((stage_times,[sleep_dur]))
-    stage_labels=np.concatenate((stage_labels,[6]))
+
+    plt.subplots_adjust(left=0.075, bottom=0.25 if label else 0.075, right=0.99, top=0.99)
+    if block:
+        plt.show()
+    else:
+        plt.draw()
     if label:
+        stage_times = np.array(stage_times)*(spacing/256)
+        stage_times=np.concatenate((stage_times,[sleep_dur]))
+        stage_labels=np.concatenate((stage_labels,[6]))
+        stage_times = np.array(stage_times)*(spacing/256)
         return stage_times, stage_labels
     else:
         return None
