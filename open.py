@@ -7,6 +7,7 @@ import eeg_data_process
 import math
 import tkinter
 import sys
+import os
 def mf():
     if len(sys.argv) > 1:
         fname = sys.argv[1]
@@ -22,9 +23,12 @@ def mf():
     if fname.lower().endswith(".csv") or fname.lower().endswith(".ovibe"):
         print("Loading OpenVIBE capture data from: " + fname + " ...")
         data = eeg_data_io.load_eeg_openvibe(fname)
-    else:
+    elif fname.lower().endswith(".dat"):
         print("Loading raw capture data from: " + fname + " ...")
         data = eeg_data_io.load_eeg_raw(fname)
+    else:
+        print("Unknown capture format!")
+        return
     print(data)
     length = len(data)
     print("---------------------------------------------------------")
@@ -41,9 +45,10 @@ def mf():
     print("---------------------------------------------------------")
     print("Displaying spectrograms ...")
     figwidth = 7 if minutes < 40 else 16 # adjust figure size based on number of minutes in data set so that naps get a smaller display thats easier to read
+    title = os.path.basename(fname).rsplit('.', 1)[0]
     hist,freqs = eeg_data_process.eeg_hist_freq_cutoff(hist,freqs,cutoff=25)
-    eeg_data_visual.plot_eeg_log_hist(hist,0,freqs,colormap="parula",figsize=(figwidth, 3.3),label=False,block=False)#,vmin=6,vmax=23
-    stimes,slabels=eeg_data_visual.plot_eeg_log_hist(hist,1,freqs,colormap="parula",figsize=(figwidth, 6),label=True,block=True)#,vmin=6,vmax=23
+    eeg_data_visual.plot_eeg_log_hist(hist,0,freqs,colormap="parula",title=title,figsize=(figwidth, 3.3),label=False,block=False)#,vmin=6,vmax=23
+    stimes,slabels=eeg_data_visual.plot_eeg_log_hist(hist,1,freqs,colormap="parula",title=title,figsize=(figwidth, 6),label=True,block=True)#,vmin=6,vmax=23
     print("Saving stage data ...")
     wrf = open(fname+'.stages','w')
     wr = csv.writer(wrf)

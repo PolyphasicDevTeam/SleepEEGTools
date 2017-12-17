@@ -57,6 +57,7 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 # [elid] - ID of the elctrode to be used for plotting
 # [freqs=None] - Frequency index eeg_data.process.eeg_raw_to_hist()
 # [colormap="parula"] - Colormap to be used
+# [title="EEG Spectrogram"] - Title to use for heading
 # [spacing=1792] - Spacing used when generating the histogram
 # [figsize=(15, 7.5)] - Size of the spectrogram figure
 # [vmin=None] - Value of log hist which is used for the lowest color
@@ -65,7 +66,7 @@ def plot_eeg_data(eldata, n_electrodes = 2):
 #               Default is np.max(log_hist)-0.03*np.ptp(log_hist)
 # [label=1] - 1=Labeling mode On, 0=Off
 # [block=1] - 1=Block execution of script, 0=Do not block
-def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True, block=True):
+def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", title="EEG Spectrogram", spacing=1792, figsize=(15, 7.5), vmin=None, vmax=None, label=True, block=True):
     log_hist=np.log(hist[elid,:,:])
     sleep_dur = np.shape(log_hist)[0]*spacing/256
     if vmin is None:
@@ -104,13 +105,13 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
                 cmap=colormap, interpolation="none",vmin=vmin,vmax=vmax,picker=label)
         plt.xlabel("Time (min)")
         plt.ylabel("Frequency (Hz)")
-        plt.title("EEG Spectrogram (CH" + str(elid+1) + ")")
+        plt.title(title + "   (CH" + str(elid+1) + ")")
 
     if label is True:
         sleep_stage_labels = ['NREM3','NREM2','REM','NREM1','WAKE','MASK OFF','???']
         gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
         ax0 = plt.subplot(gs[0])
-        ax0.set_title("EEG Spectrogram (CH" + str(elid+1) + ")")
+        ax0.set_title(title + "   (CH" + str(elid+1) + ")")
         if freqs is not None:
             ax0.set_yticks(yticks)
             ax0.set_yticklabels(yticklabels)
