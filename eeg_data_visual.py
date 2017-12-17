@@ -104,13 +104,13 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula", spacing=1792, f
                 cmap=colormap, interpolation="none",vmin=vmin,vmax=vmax,picker=label)
         plt.xlabel("Time (min)")
         plt.ylabel("Frequency (Hz)")
-        plt.title("EEG Spectrogram (electrode pair " + str(elid) + ")")
+        plt.title("EEG Spectrogram (CH" + str(elid+1) + ")")
 
     if label is True:
         sleep_stage_labels = ['NREM3','NREM2','REM','NREM1','WAKE','MASK OFF','???']
         gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
         ax0 = plt.subplot(gs[0])
-        ax0.set_title("EEG Spectrogram (electrode pair " + str(elid) + ")")
+        ax0.set_title("EEG Spectrogram (CH" + str(elid+1) + ")")
         if freqs is not None:
             ax0.set_yticks(yticks)
             ax0.set_yticklabels(yticklabels)
