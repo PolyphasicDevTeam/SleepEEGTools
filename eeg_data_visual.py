@@ -170,6 +170,8 @@ def plot_eeg_log_hist(hist, elid, freqs=None, colormap="parula",spacing=1792,vmi
     plt.subplots_adjust(left=0.075, bottom=0.14, right=0.99, top=0.99)
     plt.show()
     stage_times = np.array(stage_times)*(spacing/256)
+    stage_times=np.concatenate((stage_times,[sleep_dur]))
+    stage_labels=np.concatenate((stage_labels,[6]))
     if label:
         return stage_times, stage_labels
     else:
