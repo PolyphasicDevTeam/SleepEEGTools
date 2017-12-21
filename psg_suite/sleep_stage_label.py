@@ -69,8 +69,8 @@ class SleepStageLabel():
                     self.stage_times[idx] = xmouse
                     self.stage_labels[idx] = self.stage_label
                 else:
-                    self.stage_times.pop(idx)
-                    self.stage_labels.pop(idx)
+                    self.stage_times = np.delete(self.stage_times, idx)
+                    self.stage_labels = np.delete(self.stage_labels, idx)
             else:
                 if self.stage_labels[-1] != self.stage_label:
                     self.stage_times = np.append(self.stage_times, xmouse)
@@ -82,8 +82,8 @@ class SleepStageLabel():
             fig.canvas.draw()
             for i in range(1, len(self.stage_labels)):
                 if self.stage_labels[i] == self.stage_labels[i-1]:
-                    self.stage_labels.pop(i)
-                    self.stage_times.pop(i)
+                    self.stage_labels = np.delete(self.stage_labels, i)
+                    self.stage_times = np.delete(self.stage_times, i)
 
         
         for did in range(len(display_elems)):
