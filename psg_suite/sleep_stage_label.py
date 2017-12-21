@@ -129,7 +129,7 @@ class SleepStageLabel():
         ax1.set_xticklabels(xticklabels)
 
         self.stage_label = 0
-        rax = plt.axes([0.0, 0.0, 0.10, 0.21], facecolor='lightgoldenrodyellow')
+        rax = plt.axes([0.0, 0.0, 0.10, 0.16], facecolor='lightgoldenrodyellow')
         radio = RadioButtons(rax, sleep_stage_labels[::-1], active=self.stage_label)
         axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
         bdone = Button(axdone, 'Next')
@@ -142,8 +142,9 @@ class SleepStageLabel():
         bdone.on_clicked(done)
         radio.on_clicked(stagepicker)
         fig.canvas.callbacks.connect('pick_event', on_pick)
+        fig.canvas.set_window_title('EEG Spectrogram Analysis')
 
-        plt.subplots_adjust(left=0.075, bottom=0.25, right=0.99, top=0.99)
+        plt.subplots_adjust(left=0.075, bottom=0.2, right=0.99, top=0.97)
         plt.show()
         self.stage_times = np.array(self.stage_times)
         self.stage_times = np.concatenate((self.stage_times, [self.sleep_length]))

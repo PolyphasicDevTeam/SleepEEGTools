@@ -51,13 +51,8 @@ def mf():
     figwidth = 7 if minutes < 40 else 16 # adjust figure size based on number of minutes in data set so that naps get a smaller display thats easier to read
     title = os.path.basename(fname).rsplit('.', 1)[0]
     spectrum.frequency_cutoff(25)
-
-
-    sleep_labels = SleepStageLabel(title,"2017-12-21","C1",data.sleep_duration())
-    spectrum.plot(elid=0,figsize=(figwidth,3.3),title=title)
-    spectrum.plot(elid=1,figsize=(figwidth,3.3),title=title)
-    sleep_labels.label_manual(((spectrum,{"elid":1,'colormap':'parula'}),),title=title,figsize=(figwidth, 3.3))
-
+    sleep_labels = SleepStageLabel(title,"","",data.sleep_duration())
+    sleep_labels.label_manual(((spectrum,{"elid":0,'colormap':'parula',"xlabels":False}),(spectrum,{"elid":1,'colormap':'parula',"xlabels":False})),title=title,figsize=(figwidth, 9))
     print("Saving stage data ...")
     sleep_labels.save_txt(fname+'.stages')
     print("Done")
