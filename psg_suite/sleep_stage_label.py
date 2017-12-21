@@ -17,8 +17,11 @@ class SleepStageLabel():
     sleep_block = None
     sleep_length = None
     date = None
+    loaded_stage_times = None
+    loaded_stage_labels = None
     stage_times = None
     stage_labels = None
+    saving = False
 
     def __init__(self, name, date, sleep_block, sleep_length):
         """
@@ -48,6 +51,7 @@ class SleepStageLabel():
             figsize: Size of the figure
             block: Blocks code execution until label dialog is closed
         """
+        self.saving = False
         sleep_stage_labels = ['NREM3','NREM2','REM','NREM1','WAKE','MASK OFF','???']
 
         height_ratios = np.ones(len(display_elems))*3;
@@ -55,6 +59,22 @@ class SleepStageLabel():
         fig=plt.figure(figsize=figsize)
         gs = gridspec.GridSpec(len(display_elems)+1, 1, height_ratios=height_ratios)
         ax_transforms = {}
+        def reset_labels(event=None):
+            self.stage_times = [0]
+            self.stage_labels = [5]
+            if event is not None:
+                redraw_labels(event)
+        def reload_labels(event=None):
+            self.stage_times = np.append([], self.loaded_stage_times)
+            self.stage_labels = np.append([], self.loaded_stage_labels)
+            if self.stage_times is None or self.stage_labels is None or len(self.stage_times) is not len(self.stage_labels):
+                reset_labels(event)
+            if event is not None:
+                redraw_labels(event)
+        def redraw_labels(event=None):
+            line1.set_xdata(np.concatenate((self.stage_times, [self.sleep_length])))
+            line1.set_ydata(np.concatenate((self.stage_labels, [self.stage_labels[-1]])))
+            fig.canvas.draw()
         def on_pick(event):
             #print(event.artist)
             if event.artist is None:
@@ -77,13 +97,11 @@ class SleepStageLabel():
                     self.stage_labels = np.append(self.stage_labels, self.stage_label)
             #print(stage_times)
             #print(stage_labels)
-            line1.set_xdata(np.concatenate((self.stage_times, [self.sleep_length])))
-            line1.set_ydata(np.concatenate((self.stage_labels, [self.stage_labels[-1]])))
-            fig.canvas.draw()
-            for i in range(1, len(self.stage_labels)):
+            for i in range(1, len(self.stage_labels) - 1):
                 if self.stage_labels[i] == self.stage_labels[i-1]:
                     self.stage_labels = np.delete(self.stage_labels, i)
                     self.stage_times = np.delete(self.stage_times, i)
+            redraw_labels()
 
         
         for did in range(len(display_elems)):
@@ -114,9 +132,7 @@ class SleepStageLabel():
         xticks = np.arange(0,self.sleep_length,xtickspacing)
         xticklabels = [str(int(i/60)) for i in xticks]
 
-        if self.stage_times is None or self.stage_labels is None or len(self.stage_times) is not len(self.stage_labels):
-            self.stage_times = [0]
-            self.stage_labels = [5]
+        reload_labels()
         ax1 = plt.subplot(gs[-1])
         line1,=ax1.plot(np.concatenate((self.stage_times,[self.sleep_length])), 
                         np.concatenate((self.stage_labels,[self.stage_labels[-1]])),drawstyle="steps-post")
@@ -131,14 +147,22 @@ class SleepStageLabel():
         self.stage_label = 0
         rax = plt.axes([0.0, 0.0, 0.10, 0.16], facecolor='lightgoldenrodyellow')
         radio = RadioButtons(rax, sleep_stage_labels[::-1], active=self.stage_label)
-        axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
-        bdone = Button(axdone, 'Next')
         def stagepicker(label):
             self.stage_label = sleep_stage_labels.index(label)
             #print(plot_eeg_log_hist.stage_label)
             #fig.canvas.draw_idle()
         def done(event):
+            self.saving = True
             plt.close()
+        if self.loaded_stage_labels is not None:
+            axreload = plt.axes([0.7, 0.0, 0.1, 0.075])
+            breload = Button(axreload, 'Reload')
+            breload.on_clicked(reload_labels)
+        axreset = plt.axes([0.8, 0.0, 0.1, 0.075])
+        breset = Button(axreset, 'Reset')
+        breset.on_clicked(reset_labels)
+        axdone = plt.axes([0.9, 0.0, 0.1, 0.075])
+        bdone = Button(axdone, 'Save &\n Quit')
         bdone.on_clicked(done)
         radio.on_clicked(stagepicker)
         fig.canvas.callbacks.connect('pick_event', on_pick)
@@ -166,8 +190,8 @@ class SleepStageLabel():
 
             reader = csv.reader(f)
             data = np.asfarray(np.array(list(reader)),float)
-            self.stage_times = data[:,0]
-            self.stage_labels = data[:,1].astype(int)
+            self.loaded_stage_times = self.stage_times = data[:,0]
+            self.loaded_stage_labels = self.stage_labels = data[:,1].astype(int)
  
     def save_txt(self,fname):
         """

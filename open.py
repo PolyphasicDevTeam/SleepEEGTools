@@ -59,8 +59,11 @@ def mf():
     else:
         print("No existing stage data found.")
     sleep_labels.label_manual(((spectrum,{"elid":0,'colormap':'parula',"xlabels":False}),(spectrum,{"elid":1,'colormap':'parula',"xlabels":False})),title=title,figsize=(figwidth, 9))
-    print("Saving stage data ...")
-    sleep_labels.save_txt(stages_file)
+    if sleep_labels.saving:
+        print("Saving stage data ...")
+        sleep_labels.save_txt(stages_file)
+    else:
+        print("Stage data will not be saved")
     print("Done")
 if __name__ == '__main__':
     mf()
