@@ -60,7 +60,7 @@ class EEGSpectralData():
         self.data = self.data[:,:,:ci]
         self.frequencystamps = self.frequencystamps[:ci]
         
-    def plot(self, elid=0, colormap="parula", vmin=None, vmax=None, axes=None):
+    def plot(self, elid=0, colormap="parula", vmin=None, vmax=None, xlabels=True, axes=None, title="EEG Spectrogram", figsize=(15,7), blocking=False):
         """
         Plots sperctrogram into an axes provided for desired electrode.
 
@@ -69,7 +69,11 @@ class EEGSpectralData():
             colormap: plot colormap (parula by default)
             vmin: Value of log hist which is used for the lowest color, default is np.min(log_hist)+0.43*np.ptp(log_hist)
             vmax: Value of log hist which is used for the higest color, default is np.max(log_hist)-0.03*np.ptp(log_hist)
+            xlabels: True to display x axis label, false to hide
             axes: matplotlib.axes.Axes object, None = Make new plot window
+            title: Title of the figure when plotting standalone (axes=None)
+            figsize: Size of the figure when plotting standalone (axes=None)
+            blocking: True to block program execution, false to continue when plotting standalone (axes=None)
         """
         #Log histogram for better visual interpretation
         log_hist=np.log(self.data[elid,:,:])
@@ -79,6 +83,11 @@ class EEGSpectralData():
             vmin = np.min(log_hist)+0.43*np.ptp(log_hist)
         if vmax is None:
             vmax = np.max(log_hist)-0.03*np.ptp(log_hist)
+
+        if axes is None:
+            fig=plt.figure(figsize=figsize)
+            plt.title(title)
+            axes = fig.axes[0]
 
         #Calculate Y axis labels
         yticks = np.arange(0,len(self.frequencystamps), np.argmax(self.frequencystamps>5)-1)
@@ -107,7 +116,15 @@ class EEGSpectralData():
         axes.imshow(np.transpose(log_hist), origin="lower", aspect="auto", 
                 cmap=plotting_util.colormap(colormap), interpolation="none",vmin=vmin,vmax=vmax)
         axes.set_ylabel("Frequency (Hz)")
-        axes.set_xlabel("Time (min)")
+        if xlabels:
+            axes.set_xlabel("Time (min)")
+
+        if axes is None:
+            if blocking:
+                plt.show()
+            else:
+                plt.draw()
+
 
     def index_to_time(self, index):
         """

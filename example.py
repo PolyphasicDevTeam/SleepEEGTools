@@ -1,34 +1,24 @@
 #!/bin/python3.6
 import numpy as np
 import csv
-import eeg_data_io
-import eeg_data_visual
-import eeg_data_process
+from psg_suite.eeg_data import EEGData
+from psg_suite.eeg_spectrum import EEGSpectralData
+from psg_suite.sleep_stage_label import SleepStageLabel
 def mf():
     fname = 'sample_data/record.ovibe'
-    data = eeg_data_io.load_eeg_openvibe(fname)
-
-    #fname = 'sample_data/recording.dat'
-    #data = eeg_data_io.load_eeg_raw(fname)
-
-    print(data)
-    print(np.shape(data))
-    #eeg_data_visual.plot_eeg_data(data)
-    hist,freqs = eeg_data_process.eeg_raw_to_hist(data)
-    print(np.shape(hist))
-    print(np.shape(freqs))
-    print(np.max(np.log(hist)))
-    print(np.min(np.log(hist)))
-    print(np.ptp(np.log(hist)))
-    hist,freqs = eeg_data_process.eeg_hist_freq_cutoff(hist,freqs,cutoff=40)
-
-    stimes,slabels=eeg_data_visual.plot_eeg_log_hist(hist,0,freqs)
-
-    wrf = open(fname+'.stages','w')
-    wr = csv.writer(wrf)
-    for i in range(len(stimes)):
-        wr.writerow([stimes[i],slabels[i]])
-    wrf.close()
+    data = EEGData()
+    data.load_openvibe(fname)
+    spectrum = EEGSpectralData(data)
+    spectrum.frequency_cutoff(25)
+    spectrum.plot()
+    sleep_labels = SleepStageLabel("Mono","2017-12-21","C1",data.sleep_duration())
+    sleep_labels.label_manual(((spectrum,{"elid":0}),(spectrum,{"elid":1})))
+    sleep_labels.save_txt(fname+'.stages')
+    print(sleep_labels.stage_times)
+    print(sleep_labels.stage_labels)
+    sleep_labels.load_txt(fname+'.stages')
+    print(sleep_labels.stage_times)
+    print(sleep_labels.stage_labels)
 
 if __name__ == '__main__':
     mf()

@@ -1,13 +1,16 @@
 #!/bin/python3.6
 import numpy as np
 import csv
-import eeg_data_io
-import eeg_data_visual
-import eeg_data_process
 import math
 import tkinter
+import tkinter.filedialog
 import sys
 import os
+
+from psg_suite.eeg_data import EEGData
+from psg_suite.eeg_spectrum import EEGSpectralData
+from psg_suite.sleep_stage_label import SleepStageLabel
+
 def mf():
     if len(sys.argv) > 1:
         fname = sys.argv[1]
@@ -20,41 +23,43 @@ def mf():
         print("No file was selected - aborting")
         return
     print("---------------------------------------------------------")
+    data = EEGData()
     if fname.lower().endswith(".csv") or fname.lower().endswith(".ovibe"):
         print("Loading OpenVIBE capture data from: " + fname + " ...")
-        data = eeg_data_io.load_eeg_openvibe(fname)
+        data.load_openvibe(fname)
     elif fname.lower().endswith(".dat"):
         print("Loading raw capture data from: " + fname + " ...")
-        data = eeg_data_io.load_eeg_raw(fname)
+        data.load_raw(fname)
     else:
         print("Unknown capture format!")
         return
-    print(data)
-    length = len(data)
+    print(data.data)
+    length = len(data.data)
     print("---------------------------------------------------------")
-    minutes = int(math.ceil(length / 15360))
+    minutes = int(math.ceil(data.sleep_duration()/60))
     print("data size: " + str(length) + " (" + str(minutes) + " minutes)")
     print("data shape: " + str(np.shape(data)))
     #eeg_data_visual.plot_eeg_data(data)
-    hist,freqs = eeg_data_process.eeg_raw_to_hist(data)
-    print("hist shape: " + str(np.shape(hist)))
-    print("freqs shape: " + str(np.shape(freqs)))
-    print("max: " + str(np.max(np.log(hist))))
-    print("min: " + str(np.min(np.log(hist))))
-    print("ptp: " + str(np.ptp(np.log(hist))))
+    spectrum = EEGSpectralData(data)
+    print("hist shape: " + str(np.shape(spectrum.data)))
+    print("freqs shape: " + str(np.shape(spectrum.frequencystamps)))
+    print("max: " + str(np.max(np.log(spectrum.data))))
+    print("min: " + str(np.min(np.log(spectrum.data))))
+    print("ptp: " + str(np.ptp(np.log(spectrum.data))))
     print("---------------------------------------------------------")
     print("Displaying spectrograms ...")
     figwidth = 7 if minutes < 40 else 16 # adjust figure size based on number of minutes in data set so that naps get a smaller display thats easier to read
     title = os.path.basename(fname).rsplit('.', 1)[0]
-    hist,freqs = eeg_data_process.eeg_hist_freq_cutoff(hist,freqs,cutoff=25)
-    eeg_data_visual.plot_eeg_log_hist(hist,0,freqs,colormap="parula",title=title,figsize=(figwidth, 3.3),label=False,block=False)#,vmin=6,vmax=23
-    stimes,slabels=eeg_data_visual.plot_eeg_log_hist(hist,1,freqs,colormap="parula",title=title,figsize=(figwidth, 6),label=True,block=True)#,vmin=6,vmax=23
+    spectrum.frequency_cutoff(25)
+
+
+    sleep_labels = SleepStageLabel(title,"2017-12-21","C1",data.sleep_duration())
+    spectrum.plot(elid=0,figsize=(figwidth,3.3),title=title)
+    spectrum.plot(elid=1,figsize=(figwidth,3.3),title=title)
+    sleep_labels.label_manual(((spectrum,{"elid":1,'colormap':'parula'}),),title=title,figsize=(figwidth, 3.3))
+
     print("Saving stage data ...")
-    wrf = open(fname+'.stages','w')
-    wr = csv.writer(wrf)
-    for i in range(len(stimes)):
-        wr.writerow([stimes[i],slabels[i]])
-    wrf.close()
+    sleep_labels.save_txt(fname+'.stages')
     print("Done")
 if __name__ == '__main__':
     mf()

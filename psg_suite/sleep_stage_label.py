@@ -7,6 +7,7 @@ from matplotlib import gridspec
 from matplotlib.widgets import Slider, Button, RadioButtons
 from matplotlib.collections import LineCollection
 from matplotlib.colors import LinearSegmentedColormap
+import csv
 
 class SleepStageLabel():
     """
@@ -15,7 +16,7 @@ class SleepStageLabel():
     name = None
     sleep_block = None
     sleep_length = None
-    datae = None
+    date = None
     stage_times = None
     stage_labels = None
 
@@ -34,7 +35,7 @@ class SleepStageLabel():
         self.sleep_block = sleep_block
         self.sleep_length = sleep_length
 
-    def label_manual(self, display_elems, figsize=(15, 7.5), block=True):
+    def label_manual(self, display_elems, figsize=(15, 7.5), title="Sleep Stages"):
         """
         Displays dialog for manual stage labeling
 
@@ -52,11 +53,10 @@ class SleepStageLabel():
         height_ratios = np.ones(len(display_elems))*3;
         height_ratios = np.append(height_ratios,1)
         fig=plt.figure(figsize=figsize)
-        plt.title("EEG Spectrogram")
         gs = gridspec.GridSpec(len(display_elems)+1, 1, height_ratios=height_ratios)
         ax_transforms = {}
         def on_pick(event):
-            print(event.artist)
+            #print(event.artist)
             if event.artist is None:
                 return
             xmouse, ymouse = event.mouseevent.xdata, event.mouseevent.ydata
@@ -86,10 +86,15 @@ class SleepStageLabel():
                     self.stage_times.pop(i)
 
         
-        for delem in display_elems:
-            ax = plt.subplot(gs[0])
+        for did in range(len(display_elems)):
+            delem = display_elems[did]
+            ax = plt.subplot(gs[did])
             ax_transforms[ax] = delem[0]
-            delem[0].plot(axes=ax)
+            params = delem[1]
+            params['axes']=ax
+            delem[0].plot(**params)
+            if did == 0:
+                plt.title(title)
             #TODO
             ax.set_picker(True)
             
@@ -112,7 +117,7 @@ class SleepStageLabel():
 
         self.stage_times = [0]
         self.stage_labels = [5]
-        ax1 = plt.subplot(gs[1])
+        ax1 = plt.subplot(gs[-1])
         line1,=ax1.plot(np.concatenate((self.stage_times,[self.sleep_length])), 
                         np.concatenate((self.stage_labels,[self.stage_labels[-1]])),drawstyle="steps-post")
         ax1.set_xlabel("Time (min)")
@@ -139,17 +144,43 @@ class SleepStageLabel():
         fig.canvas.callbacks.connect('pick_event', on_pick)
 
         plt.subplots_adjust(left=0.075, bottom=0.25, right=0.99, top=0.99)
-        if block:
-            plt.show()
-        else:
-            plt.draw()
+        plt.show()
         self.stage_times = np.array(self.stage_times)
         self.stage_times = np.concatenate((self.stage_times, [self.sleep_length]))
         self.stage_labels = np.concatenate((self.stage_labels, [6]))
 
+    
+    def load_txt(self, fname):
+        """
+        Loads sleep label data in text fromat from provided file
 
+        Args:
+            fname: Path to the file to be loaded
+        """
+        with open(fname) as f:
+            self.name = f.readline()
+            self.sleep_block = f.readline()
+            self.sleep_length = float(f.readline())
+            self.date = f.readline()
 
+            reader = csv.reader(f)
+            data = np.asfarray(np.array(list(reader)),float)
+            self.stage_times = data[:,0]
+            self.stage_labels = data[:,1].astype(int)
+ 
+    def save_txt(self,fname):
+        """
+        Saves sleep label data in text fromat to provided file
 
+        Args:
+            fname: Path to the file to be saved
+        """
+        with open(fname,'w') as wrf:
+            wrf.write(str(self.name)+"\n")
+            wrf.write(str(self.sleep_block)+"\n")
+            wrf.write(str(self.sleep_length)+"\n")
+            wrf.write(str(self.date)+"\n")
 
-
-
+            wr = csv.writer(wrf)
+            for i in range(len(self.stage_times)):
+                wr.writerow([self.stage_times[i],self.stage_labels[i]])
