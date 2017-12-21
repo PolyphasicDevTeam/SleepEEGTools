@@ -52,9 +52,15 @@ def mf():
     title = os.path.basename(fname).rsplit('.', 1)[0]
     spectrum.frequency_cutoff(25)
     sleep_labels = SleepStageLabel(title,"","",data.sleep_duration())
+    stages_file = fname + '.stages'
+    if os.path.isfile(stages_file):
+        print("Loading existing stage data ...")
+        sleep_labels.load_txt(stages_file)
+    else:
+        print("No existing stage data found.")
     sleep_labels.label_manual(((spectrum,{"elid":0,'colormap':'parula',"xlabels":False}),(spectrum,{"elid":1,'colormap':'parula',"xlabels":False})),title=title,figsize=(figwidth, 9))
     print("Saving stage data ...")
-    sleep_labels.save_txt(fname+'.stages')
+    sleep_labels.save_txt(stages_file)
     print("Done")
 if __name__ == '__main__':
     mf()

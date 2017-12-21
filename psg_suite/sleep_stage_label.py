@@ -73,8 +73,8 @@ class SleepStageLabel():
                     self.stage_labels.pop(idx)
             else:
                 if self.stage_labels[-1] != self.stage_label:
-                    self.stage_times.append(xmouse)
-                    self.stage_labels.append(self.stage_label)
+                    self.stage_times = np.append(self.stage_times, xmouse)
+                    self.stage_labels = np.append(self.stage_labels, self.stage_label)
             #print(stage_times)
             #print(stage_labels)
             line1.set_xdata(np.concatenate((self.stage_times, [self.sleep_length])))
@@ -114,9 +114,9 @@ class SleepStageLabel():
         xticks = np.arange(0,self.sleep_length,xtickspacing)
         xticklabels = [str(int(i/60)) for i in xticks]
 
-
-        self.stage_times = [0]
-        self.stage_labels = [5]
+        if self.stage_times is None or self.stage_labels is None or len(self.stage_times) is not len(self.stage_labels):
+            self.stage_times = [0]
+            self.stage_labels = [5]
         ax1 = plt.subplot(gs[-1])
         line1,=ax1.plot(np.concatenate((self.stage_times,[self.sleep_length])), 
                         np.concatenate((self.stage_labels,[self.stage_labels[-1]])),drawstyle="steps-post")
@@ -159,10 +159,10 @@ class SleepStageLabel():
             fname: Path to the file to be loaded
         """
         with open(fname) as f:
-            self.name = f.readline()
-            self.sleep_block = f.readline()
-            self.sleep_length = float(f.readline())
-            self.date = f.readline()
+            self.name = f.readline().rstrip('\n')
+            self.sleep_block = f.readline().rstrip('\n')
+            self.sleep_length = float(f.readline().rstrip('\n'))
+            self.date = f.readline().rstrip('\n')
 
             reader = csv.reader(f)
             data = np.asfarray(np.array(list(reader)),float)
@@ -182,6 +182,6 @@ class SleepStageLabel():
             wrf.write(str(self.sleep_length)+"\n")
             wrf.write(str(self.date)+"\n")
 
-            wr = csv.writer(wrf)
+            wr = csv.writer(wrf, delimiter=',', lineterminator='\n')
             for i in range(len(self.stage_times)):
                 wr.writerow([self.stage_times[i],self.stage_labels[i]])
