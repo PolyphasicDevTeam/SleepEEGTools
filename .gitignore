@@ -104,3 +104,4 @@ sample_data/recording.ovibe
 *.stages
 *.swp
 sample_data/*
+psg_suite/tests/data
