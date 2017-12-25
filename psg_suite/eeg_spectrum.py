@@ -6,6 +6,8 @@ import collections
 from  spectrum import *
 import matplotlib.pyplot as plt
 from . import plotting_util
+import pickle
+from timeit import default_timer as timer
 
 class EEGSpectralData():
     """
@@ -21,17 +23,19 @@ class EEGSpectralData():
     sampling_rate = None
     data = None
 
-    def __init__(self, eegdata, n_electrodes=2, window=2048, step=1792, downsample=1):
+    def __init__(self, eegdata=None, n_electrodes=2, window=2048, step=1792, downsample=1):
         """
         Uses raw EEG data to create frequency power distribution histogram
 
         Args:
-            eegdata: instance of EEGData
+            eegdata: instance of EEGData, only supply none if you intend to load from file
             n_electrodes: N. of electrodes to be used for computation
             window: N. of samples in sliding window used to estiamte the power at given time point
             step: N. of samples between individual power distribution estimations
             downsample: Downsampling power in frequency dimension (1=no downsampling)
         """
+        if eegdata is None:
+            return
         self.sampling_rate = eegdata.sampling_rate
         self.step =step
         self.frequencystamps = np.arange(int(window/2)+1)/(int(window/2)) * self.sampling_rate/2
@@ -137,3 +141,36 @@ class EEGSpectralData():
             time: Time associated with provided index in seconds
         """
         return index*self.step/self.sampling_rate
+
+    def load_pkl(self, fname):
+        """
+        Loads EEG spectral data data from pickle file
+
+        Args:
+            fname: Path to file to be loaded
+        """
+        start = timer()
+        with open(fname,'rb') as f:
+            ld = pickle.load(f)
+            self.timestamps = ld.timestamps
+            self.samplestamps = ld.samplestamps
+            self.frequencystmps = ld.frequencystamps
+            self.window = ld.window
+            self.step = ld.step
+            self.n_electrodes = ld.n_electrodes
+            self.sampling_rate = ld.sampling_rate
+            self.data = ld.data
+        end = timer()
+        print(fname + " unpickled in " + str(end - start))
+
+    def save_pkl(self, fname):
+        """
+        Saves EEG spectral data data to pickle file
+
+        Args:
+            fname: Path to file to be saved
+        """
+        with open(fname,'wb') as f:
+            pickle.dump(self,f)
+
+

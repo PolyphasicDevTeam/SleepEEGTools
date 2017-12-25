@@ -5,6 +5,8 @@ import numpy as np
 import csv
 import warnings
 import pickle
+from timeit import default_timer as timer
+
 
 
 '''
@@ -118,6 +120,7 @@ class EEGData():
         Args:
             fname: Path to file to be loaded
         """
+        start = timer()
         with open(fname,'rb') as f:
             ld = pickle.load(f)
             self.bitrate = ld.bitrate
@@ -126,6 +129,8 @@ class EEGData():
             self.origin = ld.origin
             self.standartized = ld.standartized
             self.data = ld.data
+        end = timer()
+        print(fname + " unpickled in " + str(end - start))
 
     def save_pkl(self, fname):
         """
