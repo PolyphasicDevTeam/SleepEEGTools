@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.widgets import Slider, Button, RadioButtons
+from matplotlib.table import Table
 from matplotlib.collections import LineCollection
 from matplotlib.colors import LinearSegmentedColormap
 import csv
@@ -59,6 +60,10 @@ class SleepStageLabel():
         fig=plt.figure(figsize=figsize)
         gs = gridspec.GridSpec(len(display_elems)+1, 1, height_ratios=height_ratios)
         ax_transforms = {}
+        def format_time_period(val):
+            m, s = divmod(int(round(val)), 60)
+            h, m = divmod(m, 60)
+            return "%d:%02d:%02d" % (h, m, s)
         def reset_labels(event=None):
             self.stage_times = [0]
             self.stage_labels = [5]
@@ -67,13 +72,27 @@ class SleepStageLabel():
         def reload_labels(event=None):
             self.stage_times = np.append([], self.loaded_stage_times)
             self.stage_labels = np.append([], self.loaded_stage_labels)
-            if self.stage_times is None or self.stage_labels is None or len(self.stage_times) is not len(self.stage_labels):
+            if self.stage_times[0] is None or self.stage_labels[0] is None or self.stage_times.size != self.stage_labels.size:
+                print("data is bad, resetting labels")
                 reset_labels(event)
+            else:
+                print("stage_times size is " + str(self.stage_times.size))
+                print("stage_labels size is " + str(self.stage_labels.size))
             if event is not None:
                 redraw_labels(event)
         def redraw_labels(event=None):
             line1.set_xdata(np.concatenate((self.stage_times, [self.sleep_length])))
             line1.set_ydata(np.concatenate((self.stage_labels, [self.stage_labels[-1]])))
+            data = [0, 0, 0, 0, 0, 0, 0, 0]
+            for x in range(0, len(self.stage_times)):
+                data_offset = int(len(sleep_stage_labels) - (self.stage_labels[x] + 1))
+                thisval = self.stage_times[x]
+                nextval = self.sleep_length if x is len(self.stage_times) - 1 else self.stage_times[x + 1]
+                diffval = nextval - thisval
+                data[data_offset] = data[data_offset] + diffval
+            data[len(data) - 1] = self.sleep_length
+            for x in range(0, len(data)):
+                table.get_celld()[x, 1].get_text().set_text(format_time_period(data[x]))
             fig.canvas.draw()
         def on_pick(event):
             #print(event.artist)
@@ -165,10 +184,24 @@ class SleepStageLabel():
         bdone = Button(axdone, 'Save &\n Quit')
         bdone.on_clicked(done)
         radio.on_clicked(stagepicker)
+        tableax = plt.axes([0.2, 0.0, 0.25, 0.16], facecolor='lightblue')
+        tableax.get_yaxis().set_visible(False)
+        table = Table(tableax, bbox=[0,0,1,1])
+        height = table._approx_text_height()
+        lidx = 0
+        for label in sleep_stage_labels[::-1]:
+            table.add_cell(lidx, 0, width=0.6, height=height, text=label)
+            table.add_cell(lidx, 1, width=0.4, height=height, text='')
+            lidx = lidx + 1
+        table.add_cell(lidx, 0, width=0.6, height=height, text='Total Sleep Time')
+        table.add_cell(lidx, 1, width=0.4, height=height, text='')
+        tableax.add_table(table)
+        
         fig.canvas.callbacks.connect('pick_event', on_pick)
         fig.canvas.set_window_title('EEG Spectrogram Analysis')
 
         plt.subplots_adjust(left=0.15 if figsize[0] < 10 else 0.075, bottom=0.2, right=0.99, top=0.97)
+        redraw_labels()
         plt.show()
         self.stage_times = np.array(self.stage_times)
         self.stage_times = np.concatenate((self.stage_times, [self.sleep_length]))
