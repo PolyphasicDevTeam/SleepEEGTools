@@ -5,7 +5,7 @@ from psg_suite.eeg_data import EEGData
 from psg_suite.eeg_spectrum import EEGSpectralData
 from psg_suite.sleep_stage_label import SleepStageLabel
 def mf():
-    fname = 'sample_data/record.ovibe'
+    fname = 'sample_data/recording.ovibe'
     data = EEGData()
     data.load_openvibe(fname)
     spectrum = EEGSpectralData(data)
