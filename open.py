@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3.6
 import numpy as np
 import csv
 import math
