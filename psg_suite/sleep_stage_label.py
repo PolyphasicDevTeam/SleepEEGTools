@@ -93,6 +93,7 @@ class SleepStageLabel():
             data[len(data) - 1] = self.sleep_length
             for x in range(0, len(data)):
                 table.get_celld()[x, 1].get_text().set_text(format_time_period(data[x]))
+                table.get_celld()[x, 2].get_text().set_text('%.02f %%' % (data[x] / data[len(data) - 1] * 100))
             fig.canvas.draw()
         def on_pick(event):
             #print(event.artist)
@@ -192,9 +193,11 @@ class SleepStageLabel():
         for label in sleep_stage_labels[::-1]:
             table.add_cell(lidx, 0, width=0.6, height=height, text=label)
             table.add_cell(lidx, 1, width=0.4, height=height, text='')
+            table.add_cell(lidx, 2, width=0.4, height=height, text='')
             lidx = lidx + 1
         table.add_cell(lidx, 0, width=0.6, height=height, text='Total Sleep Time')
         table.add_cell(lidx, 1, width=0.4, height=height, text='')
+        table.add_cell(lidx, 2, width=0.4, height=height, text='100 %')
         tableax.add_table(table)
         
         fig.canvas.callbacks.connect('pick_event', on_pick)
